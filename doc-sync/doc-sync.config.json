@@ -1,0 +1,66 @@
+{
+  "SourceRoots": [
+    {"Ref": "1", "Path": "D:\\code\\work-projects\\JBT_DualMode_Report_Database\\doc"},
+    {"Ref": "2", "Path": "D:\\code\\work-projects\\JBT_DualMode_Report_Database\\dashboard\\plan-doc"}
+  ],
+  "TargetRoots": [
+    {"Ref": "1", "Path":"C:\\Users\\garyw\\OneDrive\\Laptop Backup\\ThinkPad\\Document\\MarkdownNotes\\Crown_Work\\Crown_Work\\Reports\\JBT-DMR"}
+  ],
+  "Mappings": [
+    {
+      "SourceDir": "--1\\Ref",
+      "DestinationDir": "--1\\Ref",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--1\\Ref",
+      "DestinationDir": "--1\\Ref",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--1\\Report DB Design\\Analysis",
+      "DestinationDir": "--1\\Report DB Design\\Analysis",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--1\\Report DB Design\\Fact",
+      "DestinationDir": "--1\\Report DB Design\\Fact",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--1\\Report DB Design\\Reference",
+      "DestinationDir": "--1\\Report DB Design\\Reference",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--1\\Report DB Design\\Shared ETL",
+      "DestinationDir": "--1\\Report DB Design\\Shared ETL",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--1\\Report Instruction",
+      "DestinationDir": "--1\\Report Instruction",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--2\\10.business",
+      "DestinationDir": "--1\\dashboard\\10.business",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--2\\20.design-docs",
+      "DestinationDir": "--1\\dashboard\\20.design-docs",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--2\\30.exec-plans\\active\\phase-1.1",
+      "DestinationDir": "--1\\dashboard\\30.exec-plans\\active\\phase-1.1",
+      "IncludeSubfolders": true
+    },
+    {
+      "SourceDir": "--2\\30.exec-plans\\completed\\phase-1.1",
+      "DestinationDir": "--1\\dashboard\\30.exec-plans\\completed\\phase-1.1",
+      "IncludeSubfolders": true
+    }
+  ]
+}
