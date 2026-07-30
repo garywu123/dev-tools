@@ -1,10 +1,28 @@
 # Doc Sync Workflow
 
-This folder contains the workflow that syncs project documentation files from configured source locations into the `JBT-DMR` documentation root.
+This folder contains the workflow that syncs project documentation files from configured source locations to a configured destination (typically Obsidian).
 
-## Entry Point
+## Entry Points
 
 - `Sync-DocWorkspace.ps1`: copies files from configured source folders or source files into the matching target folders.
+- `New-DocSyncProjectSetup.ps1`: one-shot setup script that creates `doc-sync.config.json` and `.vscode/tasks.json` for a new project.
+
+## Setting Up a New Project
+
+Run the setup script from any terminal, passing only the two paths that vary per project:
+
+```powershell
+D:\code\lib-projects\dev-tools\doc-sync\New-DocSyncProjectSetup.ps1 `
+    -ProjectDir "D:\code\work-projects\my-project" `
+    -DocDestDir "C:\Users\garyw\OneDrive\MarkdownNotes\MyProject"
+```
+
+The script:
+- Creates `doc-sync.config.json` at the project root (uses `<ProjectDir>\doc` as the source unless you pass `-DocSourceDir`).
+- Creates or merges `.vscode/tasks.json` with **Doc Sync: Sync docs to Obsidian** and **Doc Sync: Preview (WhatIf)** tasks.
+- Never overwrites existing tasks entries; it merges missing ones.
+
+Use `-WhatIf` to preview what would be created/changed without writing anything.
 
 ## Configuration
 
@@ -22,8 +40,7 @@ This folder contains the workflow that syncs project documentation files from co
 - Use the `--<ref>\path` form inside `SourceDir` and `DestinationDir` to choose a root by reference.
 - Example: `--1\\Report DB Design\\Fact` means "use source root ref `1`, then go into `Report DB Design\Fact`".
 - If only one root is configured for a side, the script also accepts plain relative paths without a `--ref` prefix.
-- The script resolves the repository root from `Report_Database.code-workspace`.
-- The target root can come from `TargetRoot` in the config or from the script parameter.
+- The target root can come from `TargetRoot` in the config or from the `-TargetRoot` script parameter.
 
 ## Behavior
 
@@ -64,10 +81,29 @@ Copy one file:
 }
 ```
 
+## Script Parameters
+
+`Sync-DocWorkspace.ps1` accepts:
+
+| Parameter           | Required | Description |
+|---------------------|----------|-------------|
+| `-ConfigPath`       | No       | Path to the config file. Defaults to `doc-sync.config.json` in the script folder. |
+| `-RepoRoot`         | No       | Absolute path to the project root. When provided, bypasses the workspace file lookup. Use this for projects that are not part of the SGVM workspace. |
+| `-WorkspaceFilePath`| No       | Path to a `.code-workspace` file. Used only when `-RepoRoot` is not provided (legacy SGVM support). |
+| `-TargetRoot`       | No       | Overrides the target root from the config. |
+| `-WhatIf`           | No       | Preview operations without copying any files. |
+
 ## Usage
 
 ```powershell
-.\scripts\doc-sync\Sync-DocWorkspace.ps1 -WhatIf
+# SGVM project (legacy - resolves root from workspace file)
+.\Sync-DocWorkspace.ps1 -WhatIf
+
+# Any other project (pass -RepoRoot to bypass workspace lookup)
+.\Sync-DocWorkspace.ps1 `
+    -ConfigPath "D:\code\work-projects\my-project\doc-sync.config.json" `
+    -RepoRoot "D:\code\work-projects\my-project" `
+    -WhatIf
 ```
 
-The recommended VS Code task should pass the config path and, if needed, override `-TargetRoot`.
+The recommended VS Code task should pass `-ConfigPath` and `-RepoRoot` explicitly.

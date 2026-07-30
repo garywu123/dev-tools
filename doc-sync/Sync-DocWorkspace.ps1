@@ -12,7 +12,8 @@
 param(
     [string]$ConfigPath,
     [string]$WorkspaceFilePath,
-    [string]$TargetRoot
+    [string]$TargetRoot,
+    [string]$RepoRoot
 )
 
 Set-StrictMode -Version Latest
@@ -22,10 +23,6 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 if (-not $ConfigPath) {
     $ConfigPath = Join-Path $scriptRoot 'doc-sync.config.json'
-}
-
-if (-not $WorkspaceFilePath) {
-    $WorkspaceFilePath = Join-Path $scriptRoot '..\..\Report_Database.code-workspace'
 }
 
 function Resolve-PathRelativeToBase {
@@ -300,31 +297,42 @@ if (-not (Test-Path -LiteralPath $ConfigPath)) {
     throw "Configuration file not found: $ConfigPath"
 }
 
-if (-not (Test-Path -LiteralPath $WorkspaceFilePath)) {
-    throw "Workspace file not found: $WorkspaceFilePath"
-}
-
 $config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
 
 if (-not $TargetRoot -and $config.PSObject.Properties.Name -contains 'TargetRoot') {
     $TargetRoot = [string]$config.TargetRoot
 }
 
-$workspace = Get-Content -LiteralPath $WorkspaceFilePath -Raw | ConvertFrom-Json
-$repoFolder = $workspace.folders | Where-Object { $_.name -eq 'JBT_DualMode_Report_Database' } | Select-Object -First 1
+$workspaceDirectory = $scriptRoot
 
-if (-not $repoFolder) {
-    throw "Workspace folder named 'JBT_DualMode_Report_Database' was not found in $WorkspaceFilePath"
-}
-
-$workspaceDirectory = Split-Path -Parent $WorkspaceFilePath
-$repoRoot = [string]$repoFolder.path
-
-if ([System.IO.Path]::IsPathRooted($repoRoot)) {
-    $repoRoot = (Resolve-Path -LiteralPath $repoRoot).Path
+if ($RepoRoot) {
+    $repoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 }
 else {
-    $repoRoot = (Resolve-Path -LiteralPath (Join-Path $workspaceDirectory $repoRoot)).Path
+    if (-not $WorkspaceFilePath) {
+        $WorkspaceFilePath = Join-Path $scriptRoot '..\..\Report_Database.code-workspace'
+    }
+
+    if (-not (Test-Path -LiteralPath $WorkspaceFilePath)) {
+        throw "Workspace file not found: $WorkspaceFilePath. Provide -RepoRoot to skip workspace file lookup."
+    }
+
+    $workspace = Get-Content -LiteralPath $WorkspaceFilePath -Raw | ConvertFrom-Json
+    $repoFolder = $workspace.folders | Where-Object { $_.name -eq 'JBT_DualMode_Report_Database' } | Select-Object -First 1
+
+    if (-not $repoFolder) {
+        throw "Workspace folder named 'JBT_DualMode_Report_Database' was not found in $WorkspaceFilePath. Provide -RepoRoot to skip workspace file lookup."
+    }
+
+    $workspaceDirectory = Split-Path -Parent $WorkspaceFilePath
+    $repoRoot = [string]$repoFolder.path
+
+    if ([System.IO.Path]::IsPathRooted($repoRoot)) {
+        $repoRoot = (Resolve-Path -LiteralPath $repoRoot).Path
+    }
+    else {
+        $repoRoot = (Resolve-Path -LiteralPath (Join-Path $workspaceDirectory $repoRoot)).Path
+    }
 }
 
 $legacySourceRoot = if ($config.PSObject.Properties.Name -contains 'SourceRoot') { [string]$config.SourceRoot } else { $null }
