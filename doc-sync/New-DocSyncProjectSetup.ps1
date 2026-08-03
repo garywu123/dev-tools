@@ -138,7 +138,10 @@ $newTasks = @(
 
 if (Test-Path -LiteralPath $tasksPath) {
     # Merge: add only missing tasks, leave existing ones alone.
-    $existing = Get-Content -LiteralPath $tasksPath -Raw | ConvertFrom-Json
+    # tasks.json is JSONC (allows // comments); strip full-line comments so ConvertFrom-Json can parse it.
+    $rawTasksJson = Get-Content -LiteralPath $tasksPath -Raw
+    $strippedTasksJson = ($rawTasksJson -split "`r?`n" | Where-Object { $_.Trim() -notmatch '^//' }) -join "`n"
+    $existing = $strippedTasksJson | ConvertFrom-Json
     $existingLabels = @($existing.tasks | ForEach-Object { $_.label })
 
     $toAdd = $newTasks | Where-Object { $_['label'] -notin $existingLabels }
