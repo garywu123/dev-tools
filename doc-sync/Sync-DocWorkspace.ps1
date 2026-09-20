@@ -355,6 +355,12 @@ if ($mappings.Count -eq 0) {
     throw 'Configuration must define at least one mapping in Mappings.'
 }
 
+$excludeExtensions = @()
+
+if ($config.PSObject.Properties.Name -contains 'ExcludeExtensions') {
+    $excludeExtensions = @($config.ExcludeExtensions | ForEach-Object { ([string]$_).ToLowerInvariant() })
+}
+
 foreach ($mapping in $mappings) {
     $sourceDirValue = Get-MappingStringValue -Mapping $mapping -Name 'SourceDir'
     $sourceFileValue = Get-MappingStringValue -Mapping $mapping -Name 'SourceFile'
@@ -409,6 +415,10 @@ foreach ($mapping in $mappings) {
     }
 
     $files = Get-ChildItem @childItemParameters
+
+    if ($excludeExtensions.Count -gt 0) {
+        $files = $files | Where-Object { $excludeExtensions -notcontains $_.Extension.ToLowerInvariant() }
+    }
 
     foreach ($file in $files) {
         $relativePath = Get-RelativePath -BasePath $sourceDirectory -ChildPath $file.FullName

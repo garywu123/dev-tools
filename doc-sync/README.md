@@ -41,6 +41,9 @@ Use `-WhatIf` to preview what would be created/changed without writing anything.
 - Example: `--1\\Report DB Design\\Fact` means "use source root ref `1`, then go into `Report DB Design\Fact`".
 - If only one root is configured for a side, the script also accepts plain relative paths without a `--ref` prefix.
 - The target root can come from `TargetRoot` in the config or from the `-TargetRoot` script parameter.
+- `ExcludeExtensions` is an optional top-level array of file extensions (e.g. `[".py", ".pyc"]`) to skip when
+  scanning `SourceDir` mappings. Matching is case-insensitive and includes the leading dot. It has no effect on
+  `SourceFile` mappings, which always copy the exact file configured.
 
 ## Behavior
 
@@ -76,7 +79,22 @@ Copy one file:
 
 ```json
 {
-  "SourceFile": "--1\\Report DB Design\\Fact\\example.md",
+  "
+
+Exclude file extensions workspace-wide (e.g. skip Python scripts alongside images kept in a docs folder):
+
+```json
+{
+  "ExcludeExtensions": [".py"],
+  "Mappings": [
+    {
+      "SourceDir": "--1\\domain",
+      "DestinationDir": "--1\\domain",
+      "IncludeSubfolders": true
+    }
+  ]
+}
+```SourceFile": "--1\\Report DB Design\\Fact\\example.md",
   "DestinationDir": "--1\\Report DB Design\\Fact"
 }
 ```

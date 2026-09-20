@@ -71,7 +71,9 @@ function Reset-TestDirectories {
 function Write-TestConfig {
     param(
         [Parameter(Mandatory = $true)]
-        [object[]]$Mappings
+        [object[]]$Mappings,
+        [Parameter(Mandatory = $false)]
+        [string[]]$ExcludeExtensions
     )
 
     $config = @{
@@ -88,6 +90,10 @@ function Write-TestConfig {
             }
         )
         Mappings = $Mappings
+    }
+
+    if ($ExcludeExtensions) {
+        $config.ExcludeExtensions = $ExcludeExtensions
     }
 
     $config | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $script:ConfigPath
@@ -145,6 +151,24 @@ try {
     Invoke-DocSync
 
     Assert-PathExists -Path (Join-Path $script:TargetRoot 'single-copy\single.md')
+
+    Reset-TestDirectories
+    New-TestFile -Path (Join-Path $script:SourceRoot 'docs\notes.md') -Content 'markdown content'
+    New-TestFile -Path (Join-Path $script:SourceRoot 'docs\diagram.png') -Content 'png content'
+    New-TestFile -Path (Join-Path $script:SourceRoot 'docs\images\generate.py') -Content 'python script'
+    Write-TestConfig -ExcludeExtensions @('.py') -Mappings @(
+        @{
+            SourceDir = '--1\docs'
+            DestinationDir = '--1\docs-copy'
+            IncludeSubfolders = $true
+        }
+    )
+
+    Invoke-DocSync
+
+    Assert-PathExists -Path (Join-Path $script:TargetRoot 'docs-copy\notes.md')
+    Assert-PathExists -Path (Join-Path $script:TargetRoot 'docs-copy\diagram.png')
+    Assert-PathMissing -Path (Join-Path $script:TargetRoot 'docs-copy\images\generate.py')
 
     Write-Host 'All doc sync tests passed.'
 }
